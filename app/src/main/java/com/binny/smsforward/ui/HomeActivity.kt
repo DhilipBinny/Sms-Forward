@@ -16,7 +16,6 @@ import com.binny.smsforward.R
 import com.binny.smsforward.data.AppDatabase
 import com.binny.smsforward.data.MessageEntity
 import com.binny.smsforward.databinding.ActivityHomeBinding
-import com.binny.smsforward.service.ForwardService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -63,12 +62,6 @@ class HomeActivity : AppCompatActivity() {
         binding.switchForward.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit().putBoolean("forwarding_enabled", isChecked).apply()
             updateToggleState(isChecked)
-
-            if (isChecked) {
-                startForegroundService(Intent(this, ForwardService::class.java))
-            } else {
-                stopService(Intent(this, ForwardService::class.java))
-            }
         }
     }
 

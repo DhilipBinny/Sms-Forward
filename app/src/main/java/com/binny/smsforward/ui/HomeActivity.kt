@@ -1,24 +1,14 @@
 package com.binny.smsforward.ui
 
-import android.Manifest
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.PowerManager
-import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
-import androidx.core.app.NotificationManagerCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -45,14 +35,16 @@ class HomeActivity : AppCompatActivity() {
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        requestPermissions()
-        requestBatteryExemption()
-        requestNotificationAccess()
         setupRecyclerView()
         setupToggle()
         setupSearch()
         setupSettingsButton()
         observeData()
+        observeDestinations()
+
+        binding.cardNoDest.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
         cleanupOldMessages()
     }
 
@@ -147,31 +139,13 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    private fun requestPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 100
-                )
+    private fun observeDestinations() {
+        db.destinationDao().getAll().observe(this) { destinations ->
+            if (destinations.isEmpty()) {
+                binding.cardNoDest.visibility = View.VISIBLE
+            } else {
+                binding.cardNoDest.visibility = View.GONE
             }
-        }
-    }
-
-    private fun requestNotificationAccess() {
-        val listeners = NotificationManagerCompat.getEnabledListenerPackages(this)
-        if (packageName !in listeners) {
-            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-        }
-    }
-
-    private fun requestBatteryExemption() {
-        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-        if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-                data = Uri.parse("package:$packageName")
-            }
-            startActivity(intent)
         }
     }
 }

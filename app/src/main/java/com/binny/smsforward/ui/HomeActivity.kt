@@ -16,6 +16,7 @@ import com.binny.smsforward.R
 import com.binny.smsforward.data.AppDatabase
 import com.binny.smsforward.data.MessageEntity
 import com.binny.smsforward.databinding.ActivityHomeBinding
+import com.binny.smsforward.service.ForwardWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,7 +49,12 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = MessageAdapter()
+        adapter = MessageAdapter { message ->
+            if (message.status == "failed") {
+                ForwardWorker.enqueueRetry(this, message.id)
+                android.widget.Toast.makeText(this, "Retrying...", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
         binding.recyclerMessages.layoutManager = LinearLayoutManager(this)
         binding.recyclerMessages.adapter = adapter
     }
@@ -143,7 +149,9 @@ class HomeActivity : AppCompatActivity() {
     }
 }
 
-class MessageAdapter : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
+class MessageAdapter(
+    private val onMessageClick: (MessageEntity) -> Unit = {}
+) : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
 
     private var messages: List<MessageEntity> = emptyList()
 
@@ -159,7 +167,9 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(messages[position])
+        val msg = messages[position]
+        holder.bind(msg)
+        holder.itemView.setOnClickListener { onMessageClick(msg) }
     }
 
     override fun getItemCount() = messages.size
@@ -174,14 +184,21 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
             tvSender.text = msg.sender
             tvBody.text = msg.body
             tvTime.text = getRelativeTime(msg.timestamp)
-            tvStatus.text = msg.status
-            tvStatus.setTextColor(
-                when (msg.status) {
-                    "sent" -> 0xFF4CAF50.toInt()
-                    "failed" -> 0xFFE57373.toInt()
-                    else -> 0xFFFFA726.toInt()
+
+            when (msg.status) {
+                "sent" -> {
+                    tvStatus.text = "sent"
+                    tvStatus.setTextColor(0xFF4CAF50.toInt())
                 }
-            )
+                "failed" -> {
+                    tvStatus.text = "failed · tap to retry"
+                    tvStatus.setTextColor(0xFFE57373.toInt())
+                }
+                else -> {
+                    tvStatus.text = "pending"
+                    tvStatus.setTextColor(0xFFFFA726.toInt())
+                }
+            }
         }
 
         private fun getRelativeTime(timestamp: Long): String {

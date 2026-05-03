@@ -29,6 +29,9 @@ interface MessageDao {
     @Query("SELECT COUNT(*) FROM messages WHERE body = :body AND createdAt > :since")
     suspend fun countRecentWithBody(body: String, since: Long): Int
 
+    @Query("SELECT * FROM messages WHERE id = :id")
+    suspend fun getById(id: Long): MessageEntity?
+
     @Query("SELECT * FROM messages WHERE sender LIKE '%' || :query || '%' OR body LIKE '%' || :query || '%' ORDER BY timestamp DESC")
     fun search(query: String): LiveData<List<MessageEntity>>
 }

@@ -7,6 +7,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
+import android.os.Build
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -41,10 +42,13 @@ class TelegramForwarder(configJson: String) : Forwarder {
                     .replace("<", "&lt;")
                     .replace(">", "&gt;")
 
+                val deviceName = "${Build.MANUFACTURER} ${Build.MODEL}".trim()
+
                 val text = buildString {
                     append("📨 <b>$escapedSender</b>\n")
                     append("🕓 $time\n\n")
-                    append("$escapedBody")
+                    append("$escapedBody\n\n")
+                    append("<i>via $deviceName</i>")
                 }
 
                 val json = JSONObject().apply {

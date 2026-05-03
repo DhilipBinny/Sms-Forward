@@ -28,5 +28,8 @@ gradle/wrapper/gradle-wrapper.jar
 *.env
 *.secret
 
+# Release APKs
+/release/
+
 # Claude
 .claude/

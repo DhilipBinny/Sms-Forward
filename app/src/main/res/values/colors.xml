@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Claude AI App Theme -->
+    <color name="background">#FAF9F7</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="primary">#D4714E</color>
+    <color name="primary_dark">#B85A3A</color>
+    <color name="accent">#D4714E</color>
+    <color name="text_primary">#1C1B1A</color>
+    <color name="text_secondary">#6B6560</color>
+    <color name="text_tertiary">#9C9590</color>
+    <color name="border">#EDE8E3</color>
+    <color name="success">#4CAF50</color>
+    <color name="error">#E57373</color>
+    <color name="pending">#FFA726</color>
+    <color name="card_shadow">#0A000000</color>
+    <color name="switch_thumb">#D4714E</color>
+    <color name="switch_track">#E8DDD5</color>
+    <color name="status_active_bg">#E8F5E9</color>
+    <color name="status_inactive_bg">#F5F5F5</color>
+</resources>

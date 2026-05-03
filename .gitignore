@@ -1,0 +1,32 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/app/build
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.ap_
+*.dex
+*.class
+*.log
+/tmp/
+
+# Signing
+*.jks
+*.keystore
+signing.properties
+
+# Gradle wrapper JAR
+gradle/wrapper/gradle-wrapper.jar
+
+# Environment / secrets
+.env
+*.env
+*.secret
+
+# Claude
+.claude/

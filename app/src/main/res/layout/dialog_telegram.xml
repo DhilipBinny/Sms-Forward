@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Bot Token"
+        android:textSize="13sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="4dp" />
+
+    <EditText
+        android:id="@+id/et_token"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="123456789:ABCdef..."
+        android:inputType="text"
+        android:background="@drawable/input_bg"
+        android:paddingHorizontal="14dp"
+        android:textSize="14sp"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chat ID"
+        android:textSize="13sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="4dp" />
+
+    <EditText
+        android:id="@+id/et_chat_id"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="-1001234567890 or your user ID"
+        android:inputType="text"
+        android:background="@drawable/input_bg"
+        android:paddingHorizontal="14dp"
+        android:textSize="14sp" />
+</LinearLayout>

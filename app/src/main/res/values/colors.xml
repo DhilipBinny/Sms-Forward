@@ -18,4 +18,5 @@
     <color name="switch_track">#E8DDD5</color>
     <color name="status_active_bg">#E8F5E9</color>
     <color name="status_inactive_bg">#F5F5F5</color>
+    <color name="warning_bg">#FFF3E0</color>
 </resources>

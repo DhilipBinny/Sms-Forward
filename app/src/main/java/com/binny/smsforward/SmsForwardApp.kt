@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import androidx.appcompat.app.AppCompatDelegate
 
 class SmsForwardApp : Application() {
 
@@ -13,7 +14,14 @@ class SmsForwardApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        applyTheme()
         createNotificationChannel()
+    }
+
+    private fun applyTheme() {
+        val prefs = getSharedPreferences("sms_forward", MODE_PRIVATE)
+        val mode = prefs.getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        AppCompatDelegate.setDefaultNightMode(mode)
     }
 
     private fun createNotificationChannel() {

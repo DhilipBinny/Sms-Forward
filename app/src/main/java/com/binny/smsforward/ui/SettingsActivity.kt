@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import androidx.appcompat.app.AppCompatDelegate
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -165,6 +166,38 @@ class SettingsActivity : AppCompatActivity() {
             val days = value.toInt()
             binding.tvRetentionValue.text = "$days days"
             prefs.edit().putInt("retention_days", days).apply()
+        }
+
+        val themeMode = prefs.getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        binding.tvThemeValue.text = themeLabel(themeMode)
+
+        binding.rowTheme.setOnClickListener {
+            val options = arrayOf("Light", "Dark", "System")
+            val modes = intArrayOf(
+                AppCompatDelegate.MODE_NIGHT_NO,
+                AppCompatDelegate.MODE_NIGHT_YES,
+                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            )
+            val current = modes.indexOf(prefs.getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM))
+
+            AlertDialog.Builder(this, R.style.DialogTheme)
+                .setTitle("Theme")
+                .setSingleChoiceItems(options, current) { dialog, which ->
+                    val selected = modes[which]
+                    prefs.edit().putInt("theme_mode", selected).apply()
+                    AppCompatDelegate.setDefaultNightMode(selected)
+                    binding.tvThemeValue.text = options[which]
+                    dialog.dismiss()
+                }
+                .show()
+        }
+    }
+
+    private fun themeLabel(mode: Int): String {
+        return when (mode) {
+            AppCompatDelegate.MODE_NIGHT_NO -> "Light"
+            AppCompatDelegate.MODE_NIGHT_YES -> "Dark"
+            else -> "System"
         }
     }
 

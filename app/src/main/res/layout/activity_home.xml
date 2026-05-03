@@ -7,22 +7,10 @@
     android:padding="20dp">
 
     <!-- Header -->
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="24dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="SMS Forward"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_primary"
-            android:fontFamily="sans-serif-medium" />
+        android:layout_marginBottom="16dp">
 
         <ImageView
             android:id="@+id/btn_settings"
@@ -30,9 +18,10 @@
             android:layout_height="40dp"
             android:src="@drawable/ic_settings"
             android:padding="8dp"
+            android:layout_gravity="end"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Settings" />
-    </LinearLayout>
+    </FrameLayout>
 
     <!-- Status Card -->
     <androidx.cardview.widget.CardView

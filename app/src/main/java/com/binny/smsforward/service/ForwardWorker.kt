@@ -65,17 +65,22 @@ class ForwardWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             var allDestinationsOk = true
 
             for (destination in destinations) {
-                val forwarder = ForwarderFactory.create(destination)
-                val result = forwarder.forward(message.sender, message.body, message.timestamp)
+                try {
+                    val forwarder = ForwarderFactory.create(destination)
+                    val result = forwarder.forward(message.sender, message.body, message.timestamp)
 
-                if (result.isFailure) {
-                    Log.e(TAG, "Forward failed to ${destination.name}: ${result.exceptionOrNull()?.message}")
+                    if (result.isFailure) {
+                        Log.e(TAG, "Forward failed to ${destination.name}: ${result.exceptionOrNull()?.message}")
+                        allDestinationsOk = false
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Forwarder error for ${destination.name}: ${e.message}")
                     allDestinationsOk = false
                 }
             }
 
             if (allDestinationsOk) {
-                db.messageDao().update(message.copy(status = "sent", retryCount = message.retryCount + 1))
+                db.messageDao().update(message.copy(status = "sent"))
                 Log.d(TAG, "Message ${message.id} sent successfully")
             } else {
                 db.messageDao().update(message.copy(status = "pending", retryCount = message.retryCount + 1))

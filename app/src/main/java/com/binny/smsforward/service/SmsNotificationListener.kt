@@ -25,6 +25,11 @@ class SmsNotificationListener : NotificationListenerService() {
             "com.samsung.android.messaging",
             "com.google.android.apps.messaging",
             "com.android.mms",
+            "com.oneplus.mms",
+            "com.miui.messaging",
+            "com.coloros.smsmms",
+            "com.vivo.messaging",
+            "com.asus.message",
         )
     }
 

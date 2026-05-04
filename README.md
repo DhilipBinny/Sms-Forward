@@ -105,7 +105,8 @@ Enter any URL that accepts POST requests with JSON body:
 {
   "sender": "+91 98765 43210",
   "body": "Your OTP is 482913",
-  "timestamp": 1677123456789
+  "timestamp": 1677123456789,
+  "device": "samsung SM-S937B"
 }
 ```
 

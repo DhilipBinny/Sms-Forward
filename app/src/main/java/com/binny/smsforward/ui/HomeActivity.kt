@@ -17,7 +17,7 @@ import com.binny.smsforward.data.AppDatabase
 import com.binny.smsforward.data.MessageEntity
 import com.binny.smsforward.databinding.ActivityHomeBinding
 import com.binny.smsforward.service.ForwardWorker
-import kotlinx.coroutines.CoroutineScope
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -133,7 +133,7 @@ class HomeActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("sms_forward", MODE_PRIVATE)
         val days = prefs.getInt("retention_days", 30)
         val cutoff = System.currentTimeMillis() - (days.toLong() * 24 * 60 * 60 * 1000)
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             db.messageDao().deleteOlderThan(cutoff)
         }
     }
@@ -185,18 +185,19 @@ class MessageAdapter(
             tvBody.text = msg.body
             tvTime.text = getRelativeTime(msg.timestamp)
 
+            val context = itemView.context
             when (msg.status) {
                 "sent" -> {
                     tvStatus.text = "sent"
-                    tvStatus.setTextColor(0xFF4CAF50.toInt())
+                    tvStatus.setTextColor(context.getColor(R.color.success))
                 }
                 "failed" -> {
                     tvStatus.text = "failed · tap to retry"
-                    tvStatus.setTextColor(0xFFE57373.toInt())
+                    tvStatus.setTextColor(context.getColor(R.color.error))
                 }
                 else -> {
                     tvStatus.text = "pending"
-                    tvStatus.setTextColor(0xFFFFA726.toInt())
+                    tvStatus.setTextColor(context.getColor(R.color.pending))
                 }
             }
         }

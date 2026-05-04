@@ -43,15 +43,26 @@ class OnboardingActivity : AppCompatActivity() {
         }
 
         binding.btnContinue.setOnClickListener {
+            val permsNeeded = mutableListOf<String>()
+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+                permsNeeded.add(Manifest.permission.RECEIVE_SMS)
+                permsNeeded.add(Manifest.permission.READ_SMS)
+            }
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(
-                        this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 100
-                    )
-                    return@setOnClickListener
+                    permsNeeded.add(Manifest.permission.POST_NOTIFICATIONS)
                 }
             }
+
+            if (permsNeeded.isNotEmpty()) {
+                ActivityCompat.requestPermissions(this, permsNeeded.toTypedArray(), 100)
+                return@setOnClickListener
+            }
+
             completeSetup()
         }
     }

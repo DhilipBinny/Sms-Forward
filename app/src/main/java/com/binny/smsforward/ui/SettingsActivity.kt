@@ -73,6 +73,11 @@ class SettingsActivity : AppCompatActivity() {
                 })
             }
         }
+        binding.rowSms.setOnClickListener {
+            startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.parse("package:$packageName")
+            })
+        }
         refreshPermissions()
     }
 
@@ -84,9 +89,12 @@ class SettingsActivity : AppCompatActivity() {
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         } else true
 
+        val hasSms = ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED
+
         setPermStatus(binding.tvPermNotifAccess, hasNotifAccess)
         setPermStatus(binding.tvPermBattery, hasBattery)
         setPermStatus(binding.tvPermNotifications, hasNotifications)
+        setPermStatus(binding.tvPermSms, hasSms)
     }
 
     private fun setPermStatus(tv: TextView, granted: Boolean) {

@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
@@ -42,16 +43,27 @@ class OnboardingActivity : AppCompatActivity() {
             })
         }
 
-        binding.btnContinue.setOnClickListener {
+        binding.rowOnboardSms.setOnClickListener {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this, arrayOf(Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS), 101
+                )
+            }
+        }
+
+        binding.rowOnboardPostNotif.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(
-                        this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 100
+                        this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 102
                     )
-                    return@setOnClickListener
                 }
             }
+        }
+
+        binding.btnContinue.setOnClickListener {
             completeSetup()
         }
     }
@@ -63,33 +75,34 @@ class OnboardingActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 100) {
-            completeSetup()
-        }
+        refreshState()
     }
 
     private fun refreshState() {
         val hasNotifAccess = packageName in NotificationManagerCompat.getEnabledListenerPackages(this)
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         val hasBattery = pm.isIgnoringBatteryOptimizations(packageName)
+        val hasSms = ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED
+        val hasPostNotif = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        } else true
 
-        if (hasNotifAccess) {
-            binding.tvOnboardNotif.text = "Granted"
-            binding.tvOnboardNotif.setTextColor(getColor(R.color.success))
+        setStatus(binding.tvOnboardNotif, hasNotifAccess)
+        setStatus(binding.tvOnboardBattery, hasBattery)
+        setStatus(binding.tvOnboardSms, hasSms)
+        setStatus(binding.tvOnboardPostNotif, hasPostNotif)
+
+        binding.btnContinue.isEnabled = hasNotifAccess && hasBattery && hasSms && hasPostNotif
+    }
+
+    private fun setStatus(tv: TextView, granted: Boolean) {
+        if (granted) {
+            tv.text = "Granted"
+            tv.setTextColor(getColor(R.color.success))
         } else {
-            binding.tvOnboardNotif.text = "Tap to grant"
-            binding.tvOnboardNotif.setTextColor(getColor(R.color.error))
+            tv.text = "Tap to grant"
+            tv.setTextColor(getColor(R.color.error))
         }
-
-        if (hasBattery) {
-            binding.tvOnboardBattery.text = "Granted"
-            binding.tvOnboardBattery.setTextColor(getColor(R.color.success))
-        } else {
-            binding.tvOnboardBattery.text = "Tap to grant"
-            binding.tvOnboardBattery.setTextColor(getColor(R.color.error))
-        }
-
-        binding.btnContinue.isEnabled = hasNotifAccess && hasBattery
     }
 
     private fun isSetupComplete(): Boolean {

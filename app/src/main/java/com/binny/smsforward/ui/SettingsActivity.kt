@@ -134,17 +134,25 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun showAddDestinationDialog() {
-        val types = arrayOf("Telegram", "Ntfy", "Webhook")
-        AlertDialog.Builder(this, R.style.DialogTheme)
+        val view = layoutInflater.inflate(R.layout.dialog_destination_picker, null)
+        val dialog = AlertDialog.Builder(this, R.style.DialogTheme)
             .setTitle("Add Destination")
-            .setItems(types) { _, which ->
-                when (which) {
-                    0 -> showTelegramConfigDialog()
-                    1 -> showNtfyConfigDialog()
-                    2 -> showWebhookConfigDialog()
-                }
-            }
+            .setView(view)
+            .setNegativeButton("Cancel", null)
             .show()
+
+        view.findViewById<View>(R.id.row_telegram).setOnClickListener {
+            dialog.dismiss()
+            showTelegramConfigDialog()
+        }
+        view.findViewById<View>(R.id.row_ntfy).setOnClickListener {
+            dialog.dismiss()
+            showNtfyConfigDialog()
+        }
+        view.findViewById<View>(R.id.row_webhook).setOnClickListener {
+            dialog.dismiss()
+            showWebhookConfigDialog()
+        }
     }
 
     private fun setupAdvanced() {

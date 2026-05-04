@@ -4,6 +4,16 @@ Android app that forwards incoming SMS and RCS messages to **Telegram**, **Ntfy*
 
 Built for scenarios where you need messages from one phone delivered to another — without carrier SMS costs.
 
+## Screenshots
+
+<p align="center">
+  <img src="screenshots/home.jpeg" width="250" alt="Home" />
+  &nbsp;&nbsp;
+  <img src="screenshots/settings-permissions.jpeg" width="250" alt="Settings - Permissions" />
+  &nbsp;&nbsp;
+  <img src="screenshots/settings-advanced.jpeg" width="250" alt="Settings - Advanced" />
+</p>
+
 ## Features
 
 - **SMS + RCS forwarding** — catches all incoming messages via NotificationListenerService

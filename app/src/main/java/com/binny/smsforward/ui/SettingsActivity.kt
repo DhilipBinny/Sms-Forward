@@ -256,9 +256,23 @@ class SettingsActivity : AppCompatActivity() {
             .show()
     }
 
+    private val webhookFormats = arrayOf("Generic", "Slack", "Discord")
+    private val webhookFormatKeys = arrayOf("generic", "slack", "discord")
+
     private fun showWebhookConfigDialog() {
         val view = layoutInflater.inflate(R.layout.dialog_webhook, null)
         val etUrl = view.findViewById<EditText>(R.id.et_url)
+        val tvFormat = view.findViewById<TextView>(R.id.tv_format)
+        var selectedFormat = 0
+
+        tvFormat.setOnClickListener {
+            AlertDialog.Builder(this, R.style.DialogTheme)
+                .setItems(webhookFormats) { _, which ->
+                    selectedFormat = which
+                    tvFormat.text = webhookFormats[which]
+                }
+                .show()
+        }
 
         AlertDialog.Builder(this, R.style.DialogTheme)
             .setTitle("Webhook")
@@ -266,12 +280,14 @@ class SettingsActivity : AppCompatActivity() {
             .setPositiveButton("Save") { _, _ ->
                 val config = JSONObject().apply {
                     put("url", etUrl.text.toString().trim())
+                    put("format", webhookFormatKeys[selectedFormat])
                 }
+                val name = if (selectedFormat == 0) "Webhook" else webhookFormats[selectedFormat]
                 lifecycleScope.launch {
                     db.destinationDao().insert(
                         DestinationEntity(
                             type = "webhook",
-                            name = "Webhook",
+                            name = name,
                             config = config.toString()
                         )
                     )
@@ -376,9 +392,21 @@ class SettingsActivity : AppCompatActivity() {
     private fun editWebhookDialog(dest: DestinationEntity) {
         val view = layoutInflater.inflate(R.layout.dialog_webhook, null)
         val etUrl = view.findViewById<EditText>(R.id.et_url)
+        val tvFormat = view.findViewById<TextView>(R.id.tv_format)
 
         val config = JSONObject(dest.config)
         etUrl.setText(config.getString("url"))
+        var selectedFormat = webhookFormatKeys.indexOf(config.optString("format", "generic")).coerceAtLeast(0)
+        tvFormat.text = webhookFormats[selectedFormat]
+
+        tvFormat.setOnClickListener {
+            AlertDialog.Builder(this, R.style.DialogTheme)
+                .setItems(webhookFormats) { _, which ->
+                    selectedFormat = which
+                    tvFormat.text = webhookFormats[which]
+                }
+                .show()
+        }
 
         AlertDialog.Builder(this, R.style.DialogTheme)
             .setTitle("Edit Webhook")
@@ -386,9 +414,11 @@ class SettingsActivity : AppCompatActivity() {
             .setPositiveButton("Save") { _, _ ->
                 val newConfig = JSONObject().apply {
                     put("url", etUrl.text.toString().trim())
+                    put("format", webhookFormatKeys[selectedFormat])
                 }
+                val name = if (selectedFormat == 0) "Webhook" else webhookFormats[selectedFormat]
                 lifecycleScope.launch {
-                    db.destinationDao().update(dest.copy(config = newConfig.toString()))
+                    db.destinationDao().update(dest.copy(name = name, config = newConfig.toString()))
                 }
             }
             .setNegativeButton("Cancel", null)
@@ -476,7 +506,10 @@ class DestinationAdapter(
                     "ntfy" -> {
                         "${json.optString("server", "ntfy.sh")}/${json.getString("topic")}"
                     }
-                    "webhook" -> json.getString("url")
+                    "webhook" -> {
+                        val fmt = json.optString("format", "generic").replaceFirstChar { it.uppercase() }
+                        "$fmt · ${json.getString("url")}"
+                    }
                     else -> dest.config
                 }
             } catch (_: Exception) {

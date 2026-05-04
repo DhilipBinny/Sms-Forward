@@ -17,9 +17,29 @@
         android:id="@+id/et_url"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:hint="https://your-server.com/sms"
+        android:hint="https://hooks.slack.com/..."
         android:inputType="textUri"
         android:background="@drawable/input_bg"
         android:paddingHorizontal="14dp"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Format"
+        android:textSize="13sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:id="@+id/tv_format"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Generic"
+        android:gravity="center_vertical"
+        android:background="@drawable/input_bg"
+        android:paddingHorizontal="14dp"
+        android:textSize="14sp"
+        android:textColor="@color/text_primary" />
 </LinearLayout>

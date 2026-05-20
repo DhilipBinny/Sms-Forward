@@ -254,8 +254,10 @@ class SettingsActivity : AppCompatActivity() {
             .setTitle("Ntfy")
             .setView(view)
             .setPositiveButton("Save") { _, _ ->
+                val server = etServer.text.toString().trim()
+                if (!isValidUrl(server)) return@setPositiveButton
                 val config = JSONObject().apply {
-                    put("server", etServer.text.toString().trim())
+                    put("server", server)
                     put("topic", etTopic.text.toString().trim())
                 }
                 lifecycleScope.launch {
@@ -294,8 +296,10 @@ class SettingsActivity : AppCompatActivity() {
             .setTitle("Webhook")
             .setView(view)
             .setPositiveButton("Save") { _, _ ->
+                val url = etUrl.text.toString().trim()
+                if (!isValidUrl(url)) return@setPositiveButton
                 val config = JSONObject().apply {
-                    put("url", etUrl.text.toString().trim())
+                    put("url", url)
                     put("format", webhookFormatKeys[selectedFormat])
                 }
                 val name = if (selectedFormat == 0) "Webhook" else webhookFormats[selectedFormat]
@@ -393,8 +397,10 @@ class SettingsActivity : AppCompatActivity() {
             .setTitle("Edit Ntfy")
             .setView(view)
             .setPositiveButton("Save") { _, _ ->
+                val server = etServer.text.toString().trim()
+                if (!isValidUrl(server)) return@setPositiveButton
                 val newConfig = JSONObject().apply {
-                    put("server", etServer.text.toString().trim())
+                    put("server", server)
                     put("topic", etTopic.text.toString().trim())
                 }
                 lifecycleScope.launch {
@@ -428,8 +434,10 @@ class SettingsActivity : AppCompatActivity() {
             .setTitle("Edit Webhook")
             .setView(view)
             .setPositiveButton("Save") { _, _ ->
+                val url = etUrl.text.toString().trim()
+                if (!isValidUrl(url)) return@setPositiveButton
                 val newConfig = JSONObject().apply {
-                    put("url", etUrl.text.toString().trim())
+                    put("url", url)
                     put("format", webhookFormatKeys[selectedFormat])
                 }
                 val name = if (selectedFormat == 0) "Webhook" else webhookFormats[selectedFormat]
@@ -458,6 +466,18 @@ class SettingsActivity : AppCompatActivity() {
                 Toast.makeText(this@SettingsActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    private fun isValidUrl(url: String): Boolean {
+        if (url.isBlank()) {
+            Toast.makeText(this, "URL cannot be empty", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        if (!url.startsWith("https://")) {
+            Toast.makeText(this, "URL must start with https://", Toast.LENGTH_LONG).show()
+            return false
+        }
+        return true
     }
 
     private fun deleteDestination(destination: DestinationEntity) {

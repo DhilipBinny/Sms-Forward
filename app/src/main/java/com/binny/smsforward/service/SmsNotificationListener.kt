@@ -11,6 +11,7 @@ import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import com.binny.smsforward.BuildConfig
 import androidx.core.app.NotificationCompat
 import androidx.work.*
 import com.binny.smsforward.R
@@ -61,14 +62,14 @@ class SmsNotificationListener : NotificationListenerService() {
         val body = extractBody(extras, sbn)
 
         if (body == null || isRedacted(body)) {
-            Log.d(TAG, "Content hidden or null from $sender")
+            if (BuildConfig.DEBUG) Log.d(TAG, "Content hidden or null from $sender")
             showSensitiveContentGuidance()
             return
         }
 
         val timestamp = sbn.postTime
 
-        Log.d(TAG, "Notification from=$sender body=${body.take(30)} key=${sbn.key}")
+        if (BuildConfig.DEBUG) Log.d(TAG, "Notification from=$sender body=${body.take(30)} key=${sbn.key}")
 
         val db = AppDatabase.get(this)
 
@@ -89,7 +90,7 @@ class SmsNotificationListener : NotificationListenerService() {
             }
 
             if (!passes) {
-                Log.d(TAG, "Filtered out: $sender")
+                if (BuildConfig.DEBUG) Log.d(TAG, "Filtered out: $sender")
                 return@launch
             }
 

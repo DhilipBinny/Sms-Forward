@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import android.util.Log
+import com.binny.smsforward.BuildConfig
 import androidx.work.*
 import com.binny.smsforward.data.AppDatabase
 import com.binny.smsforward.data.MessageEntity
@@ -42,7 +43,7 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
                     val body = parts.joinToString("") { it.messageBody ?: "" }
                     val timestamp = parts.first().timestampMillis
 
-                    Log.d(TAG, "SMS from $sender: ${body.take(30)}")
+                    if (BuildConfig.DEBUG) Log.d(TAG, "SMS from $sender: ${body.take(30)}")
 
                     val since = System.currentTimeMillis() - DEDUP_WINDOW_MS
                     if (db.messageDao().countRecentWithBody(body, since) > 0) {
@@ -60,7 +61,7 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
                     }
 
                     if (!passes) {
-                        Log.d(TAG, "Filtered out: $sender")
+                        if (BuildConfig.DEBUG) Log.d(TAG, "Filtered out: $sender")
                         continue
                     }
 

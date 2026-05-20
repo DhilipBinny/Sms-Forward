@@ -5,7 +5,7 @@ import androidx.room.*
 
 @Dao
 interface MessageDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert
     suspend fun insert(message: MessageEntity): Long
 
     @Update

@@ -26,6 +26,7 @@ class SmsNotificationListener : NotificationListenerService() {
 
     companion object {
         private const val TAG = "SmsNotifListener"
+        private const val DEDUP_WINDOW_MS = 30_000L
 
         private val SMS_PACKAGES = setOf(
             "com.samsung.android.messaging",
@@ -58,14 +59,9 @@ class SmsNotificationListener : NotificationListenerService() {
         val sender = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: return
 
         val body = extractBody(extras, sbn)
-        if (body == null) {
-            Log.d(TAG, "No body extracted, may be sensitive content")
-            showSensitiveContentGuidance()
-            return
-        }
-        if (body.contains("sensitive notification", ignoreCase = true) ||
-            body.contains("content hidden", ignoreCase = true)) {
-            Log.d(TAG, "Sensitive content hidden by OS")
+
+        if (body == null || isRedacted(body)) {
+            Log.d(TAG, "Content hidden or null from $sender")
             showSensitiveContentGuidance()
             return
         }
@@ -77,6 +73,12 @@ class SmsNotificationListener : NotificationListenerService() {
         val db = AppDatabase.get(this)
 
         serviceScope.launch {
+            val since = System.currentTimeMillis() - DEDUP_WINDOW_MS
+            if (db.messageDao().countRecentWithBody(body, since) > 0) {
+                Log.d(TAG, "Duplicate body in last 30s, skipping")
+                return@launch
+            }
+
             val filters = db.filterDao().getEnabled()
             val passes = filters.isEmpty() || filters.any { f ->
                 when (f.type) {
@@ -91,7 +93,7 @@ class SmsNotificationListener : NotificationListenerService() {
                 return@launch
             }
 
-            val id = db.messageDao().insert(
+            db.messageDao().insert(
                 MessageEntity(
                     sender = sender,
                     body = body,
@@ -99,13 +101,7 @@ class SmsNotificationListener : NotificationListenerService() {
                     status = "pending"
                 )
             )
-
-            if (id < 0) {
-                Log.d(TAG, "Duplicate, DB ignored insert")
-                return@launch
-            }
-
-            Log.d(TAG, "Saved to DB (id=$id), scheduling forward")
+            Log.d(TAG, "Saved to DB via notification")
 
             val work = OneTimeWorkRequestBuilder<ForwardWorker>()
                 .setInitialDelay(2, TimeUnit.SECONDS)
@@ -119,6 +115,13 @@ class SmsNotificationListener : NotificationListenerService() {
             WorkManager.getInstance(this@SmsNotificationListener)
                 .enqueueUniqueWork("forward_sms", ExistingWorkPolicy.KEEP, work)
         }
+    }
+
+    private fun isRedacted(body: String): Boolean {
+        val lower = body.lowercase()
+        return lower.contains("sensitive notification") ||
+                lower.contains("content hidden") ||
+                lower.contains("contents hidden")
     }
 
     private fun extractBody(extras: android.os.Bundle, sbn: StatusBarNotification): String? {

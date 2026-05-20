@@ -1,13 +1,9 @@
 package com.binny.smsforward.data
 
 import androidx.room.Entity
-import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(
-    tableName = "messages",
-    indices = [Index(value = ["sender", "body", "timestamp"], unique = true)]
-)
+@Entity(tableName = "messages")
 data class MessageEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val sender: String,

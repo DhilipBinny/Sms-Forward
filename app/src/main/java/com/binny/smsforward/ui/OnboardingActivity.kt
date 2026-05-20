@@ -46,9 +46,13 @@ class OnboardingActivity : AppCompatActivity() {
         binding.rowOnboardSms.setOnClickListener {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this, arrayOf(Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS), 101
-                )
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECEIVE_SMS)) {
+                    ActivityCompat.requestPermissions(
+                        this, arrayOf(Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS), 101
+                    )
+                } else {
+                    openAppSettings()
+                }
             }
         }
 
@@ -56,9 +60,13 @@ class OnboardingActivity : AppCompatActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(
-                        this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 102
-                    )
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.POST_NOTIFICATIONS)) {
+                        ActivityCompat.requestPermissions(
+                            this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 102
+                        )
+                    } else {
+                        openAppSettings()
+                    }
                 }
             }
         }
@@ -105,9 +113,27 @@ class OnboardingActivity : AppCompatActivity() {
         }
     }
 
+    private fun openAppSettings() {
+        startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.parse("package:$packageName")
+        })
+    }
+
     private fun isSetupComplete(): Boolean {
-        return getSharedPreferences("sms_forward", MODE_PRIVATE)
+        val prefsDone = getSharedPreferences("sms_forward", MODE_PRIVATE)
             .getBoolean("onboarding_done", false)
+        if (prefsDone) return true
+
+        val hasNotifAccess = packageName in NotificationManagerCompat.getEnabledListenerPackages(this)
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        val hasBattery = pm.isIgnoringBatteryOptimizations(packageName)
+        val hasSms = ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED
+        if (hasNotifAccess && hasBattery && hasSms) {
+            getSharedPreferences("sms_forward", MODE_PRIVATE)
+                .edit().putBoolean("onboarding_done", true).apply()
+            return true
+        }
+        return false
     }
 
     private fun completeSetup() {

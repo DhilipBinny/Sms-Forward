@@ -18,6 +18,7 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
 
     companion object {
         private const val TAG = "SmsBroadcastReceiver"
+        private const val DEDUP_WINDOW_MS = 30_000L
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -43,6 +44,12 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
 
                     Log.d(TAG, "SMS from $sender: ${body.take(30)}")
 
+                    val since = System.currentTimeMillis() - DEDUP_WINDOW_MS
+                    if (db.messageDao().countRecentWithBody(body, since) > 0) {
+                        Log.d(TAG, "Duplicate body in last 30s, skipping")
+                        continue
+                    }
+
                     val filters = db.filterDao().getEnabled()
                     val passes = filters.isEmpty() || filters.any { f ->
                         when (f.type) {
@@ -57,7 +64,7 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
                         continue
                     }
 
-                    val id = db.messageDao().insert(
+                    db.messageDao().insert(
                         MessageEntity(
                             sender = sender,
                             body = body,
@@ -65,13 +72,8 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
                             status = "pending"
                         )
                     )
-
-                    if (id > 0) {
-                        Log.d(TAG, "Saved to DB via broadcast (id=$id)")
-                        anySaved = true
-                    } else {
-                        Log.d(TAG, "Duplicate, DB ignored insert")
-                    }
+                    Log.d(TAG, "Saved to DB via broadcast")
+                    anySaved = true
                 }
 
                 if (anySaved) {

@@ -14,7 +14,7 @@ interface MessageDao {
     @Query("SELECT * FROM messages ORDER BY timestamp DESC LIMIT :limit")
     fun getRecent(limit: Int = 50): LiveData<List<MessageEntity>>
 
-    @Query("SELECT * FROM messages WHERE status = 'pending' OR status = 'failed' ORDER BY timestamp ASC")
+    @Query("SELECT * FROM messages WHERE status = 'pending' ORDER BY timestamp ASC")
     suspend fun getPendingMessages(): List<MessageEntity>
 
     @Query("SELECT COUNT(*) FROM messages WHERE status = 'sent' AND createdAt > :since")
